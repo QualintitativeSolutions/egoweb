@@ -276,7 +276,8 @@ class Study extends CActiveRecord
 				    $data = array(
 				    	'value'=>$study->valueLogicalSkip,
 				    );
-				    u('answer', $data, "id = " . $answers[$questionId]['id']);
+				    if(isset($answers[$questionId]['id']))
+					    u('answer', $data, "id = " . $answers[$questionId]['id']);
 				    continue;
 				}
 				$question = Question::model()->findByPk($questionId);
@@ -512,7 +513,8 @@ class Study extends CActiveRecord
 				        	$data = array(
 				        		'value'=>$study->valueLogicalSkip,
 				        	);
-				        	u('answer', $data, "id = " . $answers[$questionId]['id']);
+				        	if(isset($answers[$questionId]['id']))
+				        		u('answer', $data, "id = " . $answers[$questionId]['id']);
 				        	continue;
 				        }
 				    }
