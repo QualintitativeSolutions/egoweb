@@ -20,7 +20,7 @@
 		</p>
 	</td>
 	<td>
-		<h3><a href="/analysis">Analysis</a></h3>
+		<h3><a href="/data">Data Processing</a></h3>
 		<p>
 			Analyze the data from completed interviews.
 		</p>
@@ -28,7 +28,7 @@
 	</tr>
 	<tr>
 	<td>
-		<h3><a href="/importExport">Import &amp; Export</a></h3>
+		<h3><a href="/importExport">Import &amp; Export Studies</a></h3>
 		<p>
 			Save study and respondent data as files for archiving or
 			transferring between computers.

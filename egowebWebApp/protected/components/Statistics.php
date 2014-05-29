@@ -97,34 +97,47 @@ class Statistics extends CComponent {
 
 	}
 
-	public function getDistance($visited, $node2, $trail = array()){
+	public function getDistance($visited, $node2){
 		$node1 =  $visited[count($visited)-1];
-		if(count($trail) == 0)
-			$trail[] = $node1;
 		if(in_array($node2, $this->connections[$node1])){
-			if(!isset($this->shortPaths[md5($visited[0] . $node2)]) && !isset($this->shortPaths[md5($node2.$visited[0])])){
-				$trail[] = $node2;
+			$trail = array_merge($visited,array($node2));
+			if(!isset($this->shortPaths[md5($visited[0] . $node2)])){
 				$this->shortPaths[md5($visited[0] . $node2)][] = $trail;
+				$this->shortPaths[md5($node2 . $visited[0])][] = $trail;
 			}else{
 
-				if(isset($this->shortPaths[md5($visited[0] . $node2)]))
-					$key = md5($visited[0] . $node2);
-				else
-					$key = md5($node2. $visited[0]);
+				if(count($trail) < count($this->shortPaths[md5($visited[0] . $node2)][0])){
+					$this->shortPaths[md5($visited[0] . $node2)] = array();
+					$this->shortPaths[md5($node2 . $visited[0])] = array();
+				}
 
-				if(count($trail) < count($this->shortPaths[$key][0]) -1)
-					$this->shortPaths[$key] = array();
-
-				if(count($this->shortPaths[$key]) == 0 || count($trail) == count($this->shortPaths[$key][0]) -1){
-					$trail[] = $node2;
-					$this->shortPaths[$key][] = $trail;
+				if(count($this->shortPaths[md5($visited[0] . $node2)]) == 0 || count($trail) == count($this->shortPaths[md5($visited[0] . $node2)][0])){
+					$this->shortPaths[md5($visited[0] . $node2)][] = $trail;
+					$this->shortPaths[md5($node2 . $visited[0])][] = $trail;
 				}
 			}
 		}else{
 			foreach($this->connections[$node1] as $endNode){
 				if(!in_array($endNode, $visited)){
-					$visited[] = $endNode;
-					$this->getDistance($visited, $node2, array_merge($trail,array($endNode)));
+					$v2 = array_merge($visited,array($endNode));
+					if (isset($this->shortPaths[md5($visited[0] . $endNode)])){
+						if(count($v2) < count($this->shortPaths[md5($visited[0] . $endNode)][0])){
+							$this->shortPaths[md5($visited[0] . $endNode)] = array();
+							$this->shortPaths[md5($endNode . $visited[0])] = array();
+						}
+						if(count($this->shortPaths[md5($visited[0] . $endNode)]) == 0 || count($v2) == count($this->shortPaths[md5($visited[0] . $endNode)][0])){
+							$this->shortPaths[md5($visited[0] . $endNode)][] = $v2;
+							$this->shortPaths[md5($endNode . $visited[0])][] = $v2;
+						}else{
+							continue;
+						}
+					} else {
+						$this->shortPaths[md5($visited[0] . $endNode)][] = $v2;
+						$this->shortPaths[md5($endNode . $visited[0])][] = $v2;
+					}
+					//print_r($v2);
+					//echo $this->names[$visited[0]] . ":" . $this->names[$node1].":".$this->names[$endNode]."<br>\r\n";
+					$this->getDistance($v2, $node2);
 				}
 		    }
 		}
@@ -140,7 +153,6 @@ class Statistics extends CComponent {
 	public function getBetweenness($alterId){
 		$sum = 0;
 		$otherNodes = array_diff($this->nodes, array($alterId));
-		$visited = array();
 		$endNodes = $otherNodes;
 
 		foreach($otherNodes as $node){
@@ -252,12 +264,8 @@ class Statistics extends CComponent {
 	public function getCloseness($alterId){
 		$total = 0; $reachable = 0;
 		foreach($this->nodes as $node){
-			if(isset($this->shortPaths[md5($alterId.$node)]) || isset($this->shortPaths[md5($node.$alterId)])){
-				if(isset($this->shortPaths[md5($alterId.$node)]))
-					$distance = count($this->shortPaths[md5($alterId.$node)][0]) - 1;
-				else
-					$distance = count($this->shortPaths[md5($node.$alterId)][0]) - 1;
-
+			if(isset($this->shortPaths[md5($alterId.$node)])){
+				$distance = count($this->shortPaths[md5($alterId.$node)][0]) - 1;
 				$total = $total + $distance;
 				$reachable++;
 			}

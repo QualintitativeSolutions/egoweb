@@ -46,7 +46,7 @@ class AuthoringController extends Controller
 
 		while(! feof($file)){
 			$data = fgetcsv($file);
-			if(isset($data[0]) && isset($data[1]) && $data[0] && $data[1]){
+			if(isset($data[0]) && $data[0]){
 				$model = new AlterList;
 				$criteria=new CDbCriteria;
 				$criteria->condition = ('studyId = '.$_POST['studyId']);
@@ -54,7 +54,7 @@ class AuthoringController extends Controller
 				$row = AlterList::model()->find($criteria);
 				$model->ordering = $row['ordering'];
 				$model->name = trim($data[0]);
-				$model->email = $data[1];
+				$model->email = isset($data[1]) ? $data[1] : "";
 				$model->studyId = $_POST['studyId'];
 				$model->save();
 			}

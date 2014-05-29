@@ -294,6 +294,7 @@ class Study extends CActiveRecord
 				if($egoPrefaces[$questionId] != ""){
 				    if($pageNumber == $i){
 				    	$preface = new Question;
+				    	$preface->id = $questionId;
 				    	$preface->answerType = "PREFACE";
 				    	$preface->prompt = $egoPrefaces[$questionId];
 				    	$page[$i] = array('0'=>$preface);
@@ -378,6 +379,7 @@ class Study extends CActiveRecord
 					    	if($alterPrefaces[$questionId] != ""){
 					    		if($i == $pageNumber){
 					    			$preface = new Question;
+									$preface->id = $questionId;
 					    			$preface->answerType = "PREFACE";
 					    			$preface->prompt = $alterPrefaces[$questionId];
 					    			$page[$i] = array('0'=>$preface);
@@ -404,6 +406,7 @@ class Study extends CActiveRecord
 					    	if($alterPrefaces[$questionId] != ""){
 					    		if($i == $pageNumber){
 					    			$preface = new Question;
+									$preface->id = $questionId;
 					    			$preface->answerType = "PREFACE";
 					    			$preface->prompt = $alterPrefaces[$questionId];
 					    			$page[$i] = array('0'=>$preface);
@@ -471,6 +474,7 @@ class Study extends CActiveRecord
 						    if($alterPairPrefaces[$questionId] != ""){
 						    	if($i == $pageNumber){
 						    		$preface = new Question;
+									$preface->id = $questionId;
 						    		$preface->answerType = "PREFACE";
 						    		$preface->prompt = $alterPairPrefaces[$questionId];
 						    		$page[$i] = array('0'=>$preface);
@@ -521,6 +525,7 @@ class Study extends CActiveRecord
 				    if($networkPrefaces[$questionId] != ""){
 				        if($pageNumber == $i){
 				        	$preface = new Question;
+							$preface->id = $questionId;
 				        	$preface->answerType = "PREFACE";
 				        	$preface->prompt = $networkPrefaces[$questionId];
 				        	$page[$i] = array('0'=>$preface);

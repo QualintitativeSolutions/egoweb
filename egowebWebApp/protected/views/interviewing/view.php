@@ -6,10 +6,12 @@ $completed = 0;
 if($interviewId)
 	$completed = Interview::model()->findByPk($interviewId)->completed;
 $prompts = array('INTRODUCTION', 'PREFACE', 'ALTER_PROMPT', 'CONCLUSION');
+if(!isset($key) || !$key){
 if(isset($_GET['key']))
-	$key = '&key='.$_GET['key'];
+	$key = $_GET['key'];
 else
 	$key = '';
+}
 ?>
 <script>
 
@@ -125,6 +127,12 @@ $this->renderPartial('_view_alter', array('dataProvider'=>$dataProvider, 'alterP
 	<?php if(in_array($questions[0]->answerType, $prompts)): ?>
 		<div class="questionText">
 		<?php echo Interview::interpretTags($questions[0]->prompt, $interviewId); ?>
+		<?php if($questions[0]->answerType == "PREFACE" && file_exists(Yii::app()->basePath."/../audio/".$studyId . "/PREFACE/" . $questions[0]->id . ".mp3")):?>
+			<script>
+			var promptAudio_<?=$question->id;?> = loadAudio("/audio/<?= $studyId . "/PREFACE/" . $questions[0]->id . ".mp3"; ?>");
+			</script>
+			<a class="play-sound" onclick='playSound("/audio/<?= $studyId . "/PREFACE/" . $questions[0]->id . ".mp3" ?>")' href="#"><span class="fui-volume"></span></a>
+		<?php endif; ?>
 		</div>
 		<div class="question">
 	<?php endif; ?>
@@ -139,7 +147,7 @@ $this->renderPartial('_view_alter', array('dataProvider'=>$dataProvider, 'alterP
 $form=$this->beginWidget('CActiveForm', array(
 	'id'=>'answer-form',
 	'enableAjaxValidation'=>true,
-	'action'=>'/interviewing/save/'.$studyId,
+	'action'=>'/interviewing/save/'.$studyId.($key ? "&key=" . $key : ""),
 ));
 ?>
 

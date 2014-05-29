@@ -431,6 +431,7 @@ class visualize extends Plugin
 		$alters = q("SELECT * FROM alters WHERE FIND_IN_SET(".$this->method .", interviewId)")->queryAll();
 		$alterNames = array();
 		$alterIds = array();
+		$filterIds = [];
 		foreach($alters as $alter){
 			$alterIds[] = $alter['id'];
 			$alterNames[$alter['id']] = $alter['name'];
@@ -485,8 +486,6 @@ class visualize extends Plugin
 
 		$currentNode = '';
 		$alters2 = $alters;
-		array_shift($alters2);
-		//foreach($answers as $answer){
 		foreach($alters as $alter){
 			foreach($alters2 as $alter2){
 
@@ -777,7 +776,7 @@ function init(json)
 					if(adj.getData('alpha')) list.push(adj.nodeTo.name.replace("<span class='fui-new'></span>",""));
 				});
 				//append connections information
-				var url = "/analysis/getnote?interviewId=" + interviewId + "&expressionId=" + expressionId + "&alterId=" + node.id;
+				var url = "/data/getnote?interviewId=" + interviewId + "&expressionId=" + expressionId + "&alterId=" + node.id;
 				$.get(url, function(data){
 					$jit.id('inner-details').innerHTML = data;
 					$jit.id('inner-details').innerHTML = $jit.id('inner-details').innerHTML + "<div class='pull-left col-sm-3'>" +
@@ -894,7 +893,7 @@ function refresh(container){
 }
 
 function reload(params){
-	url = "/analysis/visualize?expressionId=" + expressionId + "&interviewId=" + interviewId + "&params=" + encodeURIComponent(JSON.stringify(params));
+	url = "/data/visualize?expressionId=" + expressionId + "&interviewId=" + interviewId + "&params=" + encodeURIComponent(JSON.stringify(params));
 	document.location = url;
 }
 $(function(){
@@ -905,11 +904,11 @@ $(function(){
 function print(){
 	saveNodes();
 	params = refresh();
-	url = "/analysis/visualize?print&expressionId=" + expressionId + "&interviewId=" + interviewId + "&params=" + encodeURIComponent($("#nodeParams").val()) + "&nodes=" +  encodeURIComponent($("#nodeList").val());
+	url = "/data/visualize?print&expressionId=" + expressionId + "&interviewId=" + interviewId + "&params=" + encodeURIComponent($("#nodeParams").val()) + "&nodes=" +  encodeURIComponent($("#nodeList").val());
 	window.open(url);
 }
 function saveNote(){
-	$.post("/analysis/savenote", $("#note-form").serialize(), function(data){
+	$.post("/data/savenote", $("#note-form").serialize(), function(data){
 		$("#" + data + " .name").html($("#" + data + " .name").html() + " <span class='fui-new'></span>");
 	});
 }
