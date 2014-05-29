@@ -60,8 +60,9 @@ return array(
 		'db'=>array(
 			/*'connectionString' => 'mysql:host=localhost;dbname=egoweb_data',
 			'username' => 'egoweb',
-			'password' => "test1234",*/
-			'connectionString' => 'mysql:host=localhost;dbname=egowebbl_egoweb',
+			'password' => "test1234",
+			'connectionString' => 'mysql:host=localhost;dbname=egowebbl_egoweb',*/
+			'connectionString' => 'mysql:host=localhost;dbname=egoweb',
 			'username' => 'egowebbl',
 			'password' => "blu35ky!",
 			//'enableProfiling'=>true,
