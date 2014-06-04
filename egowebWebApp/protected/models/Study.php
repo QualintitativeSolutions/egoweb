@@ -136,8 +136,11 @@ class Study extends CActiveRecord
 		}
 		$pages[$i] = Study::checkPage($i, $pageNumber, "ALTER_PROMPT");
 		$i++;
-		$alters = Alters::model()->findAllByAttributes(array('interviewId'=>$interviewId));
-		$answers = q("SELECT count(id) FROM answer WHERE interviewId = " . $interviewId . " AND (questionType =  'ALTER' OR questionType = 'ALTER_PAIR') ")->queryScalar();
+			$criteria = array(
+				'condition'=>"FIND_IN_SET(" . $interviewId . ", interviewId)",
+			);
+			$alters = Alters::model()->findAll($criteria);
+			$answers = q("SELECT count(id) FROM answer WHERE interviewId = " . $interviewId . " AND (questionType =  'ALTER' OR questionType = 'ALTER_PAIR') ")->queryScalar();
 		if(count($alters) > 0 && $answers > 0){
 			$alter_qs = q("SELECT * FROM question WHERE studyId = $study->id AND subjectType ='ALTER' order by ordering")->queryAll();
 			$prompt = "";
@@ -166,7 +169,7 @@ class Study extends CActiveRecord
 				    		$pages[$i] = Study::checkPage($i, $pageNumber, "PREFACE");
 				    		$i++;
 				    	}
-				    	$pages[$i] = Study::checkPage($i, $pageNumber, $alter_question_list['title']);
+				    	$pages[$i] = Study::checkPage($i, $pageNumber, $question['title']);
 				    	$i++;
 				    }
 				}
