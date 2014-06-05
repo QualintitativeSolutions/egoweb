@@ -106,6 +106,7 @@ function deleteStudy(id){
 
 function deleteInterviews(id){
 	var interviews = db.query("SELECT * FROM interview WHERE completed = -1 AND studyId = " + id).data;
+	console.log(interviews);
 	for(u in interviews){
 	    var alters = db.query("SELECT * FROM alters WHERE interviewId = " + interviews[u][0]).data;
 	    for(v in alters){

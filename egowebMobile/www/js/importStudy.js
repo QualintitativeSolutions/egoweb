@@ -269,5 +269,10 @@ db.commit();
 
 function displayAudioLoad() {
 		$('#status').html("Importing audio files: " + loadedAudioFiles + " / " + totalAudioFiles);
-
+		if(loadedAudioFiles == totalAudioFiles){
+			$('#status').html("Done!");
+			setTimeout(function(){
+				$('#status').html("");
+   		  	}, 1000);
+		}
 }
