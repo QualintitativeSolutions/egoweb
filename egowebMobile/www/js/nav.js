@@ -32,7 +32,8 @@
 			}
 			if(parseInt(ego_questions[j].ASKINGSTYLELIST)){
 			    prompt = ego_questions[j].PROMPT.replace(/<\/*[^>]*>/gm, '').replace(/(\r\n|\n|\r)/gm,"");
-			    ego_question_list = ego_questions[j];
+			    if(ego_question_list == '')
+				    ego_question_list = ego_questions[j];
 			}else{
 			    pages[i] = checkPage(i, pageNumber, ego_questions[j].TITLE);
 			    i++;
@@ -41,6 +42,7 @@
 		}
 		if(ego_question_list){
 			pages[i] = checkPage(i, pageNumber, ego_question_list.TITLE);
+			ego_question_list = '';
 			i++;
 		}
 		pages[i] = checkPage(i, pageNumber, "ALTER_PROMPT");

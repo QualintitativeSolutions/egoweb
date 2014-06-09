@@ -711,9 +711,10 @@ td{
 #topbar{
 	color:#666;
 	background:#e6e7e8;
-	height:40px;
+	height:60px;
 	text-align:right;
 	padding-right:40px;
+	padding-top:20px;
 }
 
 #topbar h3{

@@ -123,7 +123,8 @@ class Study extends CActiveRecord
 			}
 			if($question['askingStyleList'] == 1){
 			    $prompt = trim(preg_replace('/<\/*[^>]*>/', '', $question['prompt']));
-			    $ego_question_list = $question;
+			    if(count($ego_question_list) == 0)
+			    	$ego_question_list = $question;
 			}else{
 			    $pages[$i] = Study::checkPage($i, $pageNumber, $question['title']);
 			    $i++;
@@ -132,6 +133,7 @@ class Study extends CActiveRecord
 		}
 		if(count($ego_question_list) > 0){
 			$pages[$i] = Study::checkPage($i, $pageNumber, $ego_question_list['title']);
+			$ego_question_list = array();
 			$i++;
 		}
 		$pages[$i] = Study::checkPage($i, $pageNumber, "ALTER_PROMPT");
@@ -145,9 +147,9 @@ class Study extends CActiveRecord
 			$alter_qs = q("SELECT * FROM question WHERE studyId = $study->id AND subjectType ='ALTER' order by ordering")->queryAll();
 			$prompt = "";
 			$alter_question_list = array();
-				$expression = new Expression;
 
 			foreach($alter_qs as $question){
+				$expression = new Expression;
 				foreach($alters as $alter){
 				    if(!$expression->evalExpression($question['answerReasonExpressionId'], $interviewId, $alter->id)){
 				    	continue;
@@ -159,7 +161,7 @@ class Study extends CActiveRecord
 				    		$pages[$i] = Study::checkPage($i, $pageNumber, "PREFACE");
 				    		$i++;
 				    	}
-				    	$pages[$i] = Study::checkPage($i, $pageNumber, $question['title']);
+				    	$pages[$i] = Study::checkPage($i, $pageNumber, $question['title'] . " - " . $alter->name);
 				    	$i++;
 				    }
 				}

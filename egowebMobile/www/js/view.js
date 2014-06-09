@@ -143,7 +143,7 @@ function view(id, interviewId, page)
 					if(columnWidth > 180)
 						columnWidth = 180;
 					if(counter == 0){
-						newForm.append('<div class="multiRow" style="width:300px">&nbsp;</div>');
+						//newForm.append('<div class="multiRow" style="width:300px">&nbsp;</div>');
 						for (s in skipList){
 							newForm.append('<div class="multiRow" style="width:'+columnWidth+'px">'+skipList[s] +'</div>');
 						}
@@ -161,7 +161,7 @@ function view(id, interviewId, page)
 					newForm.append($(this));
 				}
 			}else if($(this).attr('id') == "MULTISELECT"){
-				options = db.queryObjects("SELECT * FROM questionOption WHERE questionId = " + questions[k].ID).data;
+				options = db.queryObjects("SELECT * FROM questionOption WHERE questionId = " + questions[k].ID  + " ORDER BY ORDERING").data;
 				if(typeof model[array_id].VALUE != 'undefined')
 					values = model[array_id].VALUE.split(',');
 				else
@@ -499,6 +499,8 @@ function view(id, interviewId, page)
 }
 
 function audioFileExists(path, div){
+	if(typeof LocalFileSystem == "undefined")
+		return false;
     window.requestFileSystem(LocalFileSystem.TEMPORARY, 0, function(fileSystem){
         fileSystem.root.getFile(path, { create: false },
         function fileExists(file){

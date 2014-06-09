@@ -58,7 +58,7 @@ class MobileController extends Controller
 		$answers = q("SELECT * FROM answer WHERE studyId = " . $id)->queryAll(false);
 		$interviewIds = array();
 		$interviews = q("SELECT * FROM interview WHERE studyId = " . $id)->queryAll(false);
-		$audioFIles = array();
+		$audioFiles = array();
 
 		foreach($questions as $question){
 			if($question[4] && file_exists(Yii::app()->basePath."/../audio/".$id . "/PREFACE/" . $question[0] . ".mp3")){
