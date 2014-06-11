@@ -60,6 +60,14 @@ class MobileController extends Controller
 		$interviews = q("SELECT * FROM interview WHERE studyId = " . $id)->queryAll(false);
 		$audioFiles = array();
 
+		if(file_exists(Yii::app()->basePath."/../audio/".$id . "/STUDY/ALTERPROMPT.mp3")){
+			$audioFiles[] = array(
+				"url"=>Yii::app()->getBaseUrl(true)."/audio/". $id . "/STUDY/ALTERPROMPT.mp3",
+				"type"=>"STUDY",
+				"id"=>"ALTERPROMPT"
+			);
+		}
+
 		foreach($questions as $question){
 			if($question[4] && file_exists(Yii::app()->basePath."/../audio/".$id . "/PREFACE/" . $question[0] . ".mp3")){
 				$audioFiles[] = array(

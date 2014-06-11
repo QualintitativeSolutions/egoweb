@@ -129,10 +129,17 @@ $this->renderPartial('_view_alter', array('dataProvider'=>$dataProvider, 'alterP
 		<?php echo Interview::interpretTags($questions[0]->prompt, $interviewId); ?>
 		<?php if($questions[0]->answerType == "PREFACE" && file_exists(Yii::app()->basePath."/../audio/".$studyId . "/PREFACE/" . $questions[0]->id . ".mp3")):?>
 			<script>
-			var promptAudio_<?=$question->id;?> = loadAudio("/audio/<?= $studyId . "/PREFACE/" . $questions[0]->id . ".mp3"; ?>");
+			var promptAudio_<?=$questions[0]->id;?> = loadAudio("/audio/<?= $studyId . "/PREFACE/" . $questions[0]->id . ".mp3"; ?>");
 			</script>
 			<a class="play-sound" onclick='playSound("/audio/<?= $studyId . "/PREFACE/" . $questions[0]->id . ".mp3" ?>")' href="#"><span class="fui-volume"></span></a>
 		<?php endif; ?>
+		<?php if($questions[0]->answerType == "ALTER_PROMPT" && file_exists(Yii::app()->basePath."/../audio/".$studyId . "/STUDY/ALTERPROMPT.mp3")):?>
+			<script>
+			var promptAudio_<?=$questions[0]->id;?> = loadAudio("/audio/<?= $studyId . "/STUDY/ALTERPROMPT.mp3"; ?>");
+			</script>
+			<a class="play-sound" onclick='playSound("/audio/<?= $studyId . "/STUDY/ALTERPROMPT.mp3" ?>")' href="#"><span class="fui-volume"></span></a>
+		<?php endif; ?>
+
 		</div>
 		<div class="question">
 	<?php endif; ?>

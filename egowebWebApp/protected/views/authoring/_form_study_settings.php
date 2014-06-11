@@ -4,7 +4,16 @@
 /* @var $form CActiveForm */
 ?>
 
-
+<?php Yii::app()->clientScript->registerScriptFile(Yii::app()->baseUrl.'/js/modal.js'); ?>
+<script src="/js/nicEdit.js"></script>
+<script>
+$(function(){
+	nIntroduction = new nicEditor({buttonList : ['xhtml','fontSize','bold','italic','underline','strikeThrough','subscript','superscript','indent','outdent','hr','removeformat']}).panelInstance('Study_introduction');
+	nEgoIdPrompt = new nicEditor({buttonList : ['xhtml','fontSize','bold','italic','underline','strikeThrough','subscript','superscript','indent','outdent','hr','removeformat']}).panelInstance('Study_egoIdPrompt');
+	nAlterPrompt = new nicEditor({buttonList : ['xhtml','fontSize','bold','italic','underline','strikeThrough','subscript','superscript','indent','outdent','hr','removeformat']}).panelInstance('Study_alterPrompt');
+	nConclusion = new nicEditor({buttonList : ['xhtml','fontSize','bold','italic','underline','strikeThrough','subscript','superscript','indent','outdent','hr','removeformat']}).panelInstance('Study_conclusion');
+});
+</script>
 <div class="form">
 
 	<?php $form=$this->beginWidget('CActiveForm', array(
@@ -36,6 +45,10 @@
 
 	<div class="row" style="width:50%; float:left; padding:10px">
 		<?php echo $form->labelEx($model,'alterPrompt'); ?>
+		<div class="audioPlay" id="STUDY_ALTERPROMPT"><?php if(file_exists(Yii::app()->basePath."/../audio/".$model->id . "/STUDY/ALTERPROMPT.mp3")): ?><a class="play-sound" onclick="playSound($(this).attr('file'))" href="#" file="/audio/<?= $model->id . "/STUDY/ALTERPROMPT.mp3"; ?>"><span class="fui-volume"></span></a><?php endif; ?></div>
+		<?php if(!$model->isNewRecord):?>
+		<a class="btn btn-primary pull-right btn-sm" data-toggle="modal" data-target="#myModal" href="/authoring/uploadaudio?type=STUDY&id=ALTERPROMPT&studyId=<?= $model->id; ?>">Upload Audio</a>
+		<?php endif;?>
 		<?php echo $form->textArea($model,'alterPrompt',array('rows'=>6, 'cols'=>50)); ?>
 		<?php echo $form->error($model,'alterPrompt'); ?>
 	</div>

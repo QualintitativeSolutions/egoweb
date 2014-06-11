@@ -46,6 +46,7 @@ class visualize extends Plugin
 		20=>'9',
 		22=>'10',
 	);
+	/*
 	public $gradient = array(
 		0=>"#00f",
 		1=>"#0ae",
@@ -58,7 +59,19 @@ class visualize extends Plugin
 		8=>"#ea0",
 		9=>"#f00",
 	);
-
+	*/
+	public $gradient = array(
+		0=>"#F5D6D6",
+		1=>"#ECBEBE",
+		2=>"#E2A6A6",
+		3=>"#D98E8E",
+		4=>"#CF7777",
+		5=>"#C65F5F",
+		6=>"#BC4747",
+		7=>"#B32F2F",
+		8=>"#A91717",
+		9=>"#A00000",
+	);
 	public $stats = "";
 
 	private function getNodeColor($nodeId){
@@ -127,12 +140,34 @@ class visualize extends Plugin
 	private function getNodeSize($nodeId){
 		$default = 4;
 		if(isset($this->params['nodeSize'])){
-			$answer = q("SELECT value FROM answer WHERE questionID = ".$this->params['nodeSize']['questionId']. " AND alterId1 = " .$nodeId)->queryScalar();
-			$answer = explode(',', $answer);
-			foreach($this->params['nodeSize']['options'] as $option){
-				if($option['id'] == $answer || in_array($option['id'], $answer))
-					$default = intval($option['size']);
+			if(in_array($this->params['nodeSize']['questionId'], array("degree", "betweenness", "eigenvector"))){
+				if($this->params['nodeSize']['questionId'] == "degree"){
+					$max = $this->stats->maxDegree();
+					$min = $this->stats->minDegree();
+					$value = $this->stats->getDegree($nodeId);
+				}
+				if($this->params['nodeSize']['questionId'] == "betweenness"){
+					$max = $this->stats->maxBetweenness();
+					$min = $this->stats->minBetweenness();
+					$value = $this->stats->getBetweenness($nodeId);
+				}
+				if($this->params['nodeSize']['questionId'] == "eigenvector"){
+					$max = $this->stats->maxEigenvector();
+					$min = $this->stats->minEigenvector();
+					$value = $this->stats->EigenvectorCentrality($nodeId);
+				}
+				$range = $max - $min;
+				$value = round((($value-$min) / ($range)) * 9) + 1;
+				$default = array_keys($this->nodeSizes, $value)[0];
+			}else{
+				$answer = q("SELECT value FROM answer WHERE questionID = ".$this->params['nodeSize']['questionId']. " AND alterId1 = " .$nodeId)->queryScalar();
+				$answer = explode(',', $answer);
+				foreach($this->params['nodeSize']['options'] as $option){
+					if($option['id'] == $answer || in_array($option['id'], $answer))
+						$default = intval($option['size']);
+				}
 			}
+
 		}
 		return $default;
 	}
@@ -195,23 +230,24 @@ class visualize extends Plugin
 			echo "<option value='" . $centrality . "_nodeColor' $selected>" . ucfirst($centrality) . " Centrality</option>";
 		}
 
-			$questionIds = [];
-			foreach($alter_qs as $alter_q){
-				$questionIds[] = $alter_q['id'];
-			}
-			$questionIds = implode(",", $questionIds);
-			if(!$questionIds)
-				$questionIds = 0;
-			$alter_expression_ids = q("SELECT id FROM expression WHERE studyId = " . $this->id . " AND questionId in (" . $questionIds . ")")->queryColumn();
-			$all_expression_ids = $alter_expression_ids;
-			foreach($alter_expression_ids as $id){
-				$all_expression_ids = array_merge(q("SELECT id FROM expression WHERE FIND_IN_SET($id, value)")->queryColumn(),$all_expression_ids);
-			}
-			if($all_expression_ids){
-			$alter_expressions = q("SELECT * FROM expression WHERE id in (" . implode(",",$all_expression_ids) . ")")->queryAll();
-			}else{
-				$alter_expressions = array();
-			}
+		$questionIds = [];
+		foreach($alter_qs as $alter_q){
+			$questionIds[] = $alter_q['id'];
+		}
+		$questionIds = implode(",", $questionIds);
+		if(!$questionIds)
+			$questionIds = 0;
+		$alter_expression_ids = q("SELECT id FROM expression WHERE studyId = " . $this->id . " AND questionId in (" . $questionIds . ")")->queryColumn();
+		$all_expression_ids = $alter_expression_ids;
+		foreach($alter_expression_ids as $id){
+			$all_expression_ids = array_merge(q("SELECT id FROM expression WHERE FIND_IN_SET($id, value)")->queryColumn(),$all_expression_ids);
+		}
+		if($all_expression_ids){
+		$alter_expressions = q("SELECT * FROM expression WHERE id in (" . implode(",",$all_expression_ids) . ")")->queryAll();
+		}else{
+			$alter_expressions = array();
+		}
+
 		foreach($alter_expressions as $expression){
 			$selected = '';
 			if($nodeColorId == "expression_" . $expression['id'])
@@ -254,20 +290,12 @@ class visualize extends Plugin
 			echo "</div>";
 
 		}
+
 		foreach($centralities as $centrality){
 			echo "<div class='nodeColorOptions' id='" .$centrality ."_nodeColor' style='" . ($centrality != $nodeColorId ? "display:none" : "") . "'>";
-			?>
-			<span style="color:#00f; font-size:20px">■</span>
-			<span style="color:#0ae; font-size:20px">■</span>
-			<span style="color:#0cd; font-size:20px">■</span>
-			<span style="color:#0dc; font-size:20px">■</span>
-			<span style="color:#7ea; font-size:20px">■</span>
-			<span style="color:#ae7; font-size:20px">■</span>
-			<span style="color:#cd0; font-size:20px">■</span>
-			<span style="color:#dc0; font-size:20px">■</span>
-			<span style="color:#ea0; font-size:20px">■</span>
-			<span style="color:#f00; font-size:20px">■</span>
-			<?php
+			for($i = 0; $i<10; $i++){
+				echo '<span style="color:' . $this->gradient[$i] . '; font-size:20px">■</span>';
+			}
 			echo "</div>";
 		}
 	}
@@ -284,9 +312,8 @@ class visualize extends Plugin
 		$alter_qs = q("SELECT * FROM question WHERE subjectType = 'ALTER' AND answerType = 'MULTIPLE_SELECTION' AND studyId = ". $this->id)->queryAll();
 		echo "<div class='form-group'>";
 		echo "<label class='control-label'>Node Shape</label>";
-			echo "<select id='nodeShapeSelect' class='form-control' onchange='$(\".nodeShapeOptions\").hide();$(\"#\" + $(\"option:selected\", this).val(), $(this).closest(\"#visualize-bar\")).toggle()'>";
-
-			echo "<option value=''> Select </option>";
+		echo "<select id='nodeShapeSelect' class='form-control' onchange='$(\".nodeShapeOptions\").hide();$(\"#\" + $(\"option:selected\", this).val(), $(this).closest(\"#visualize-bar\")).toggle()'>";
+		echo "<option value=''> Select </option>";
 
 		foreach($alter_qs as $question){
 			$selected = '';
@@ -315,6 +342,8 @@ class visualize extends Plugin
 	public function actionNodesize(){
 		$params = json_decode($this->params, true);
 		$nodeSizeId = ''; $nodeSizes = array();
+		$centralities = array("degree", "betweenness", "eigenvector");
+
 		if(isset($params['nodeSize'])){
 			$nodeSizeId = $params['nodeSize']['questionId'];
 			foreach($params['nodeSize']['options'] as $option){
@@ -324,9 +353,15 @@ class visualize extends Plugin
 		$alter_qs = q("SELECT * FROM question WHERE subjectType = 'ALTER' AND answerType = 'MULTIPLE_SELECTION' AND studyId = ". $this->id)->queryAll();
 		echo "<div class='form-group'>";
 		echo "<label class='control-label'>Node Size</label>";
-			echo "<select id='nodeSizeSelect' class='form-control' onchange='$(\".nodeSizeOptions\").hide();$(\"#\" + $(\"option:selected\", this).val(), $(this).closest(\"#visualize-bar\")).toggle()'>";
+		echo "<select id='nodeSizeSelect' class='form-control' onchange='$(\".nodeSizeOptions\").hide();$(\"#\" + $(\"option:selected\", this).val(), $(this).closest(\"#visualize-bar\")).toggle()'>";
+		echo "<option value=''> Select </option>";
 
-			echo "<option value=''> Select </option>";
+		foreach($centralities as $centrality){
+			$selected = '';
+			if($nodeSizeId == $centrality)
+				$selected = "selected";
+			echo "<option value='" . $centrality . "_nodeSize' $selected>" . ucfirst($centrality) . " Centrality</option>";
+		}
 
 		foreach($alter_qs as $question){
 			$selected = '';
@@ -348,6 +383,11 @@ class visualize extends Plugin
 					$this->nodeSizes
 				). "<br>";
 			}
+			echo "</div>";
+		}
+
+		foreach($centralities as $centrality){
+			echo "<div class='nodeSizeOptions' id='" .$centrality ."_nodeSize' style='" . ($centrality != $nodeColorId ? "display:none" : "") . "'>";
 			echo "</div>";
 		}
 	}

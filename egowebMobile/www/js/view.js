@@ -50,7 +50,9 @@ function view(id, interviewId, page)
 			else
 				$('.questionText').html(interpretTags(questions[k].PROMPT, interviewId));
 
-				audioFileExists("egowebaudio/" + id + "/" + questions[k].SUBJECTTYPE + "/" + questions[k].ID + ".mp3", $('.questionText'));
+			audioFileExists("egowebaudio/" + id + "/" + questions[k].SUBJECTTYPE + "/" + questions[k].ID + ".mp3", $('.questionText'));
+			if(questions[k].ANSWERTYPE == "ALTER_PROMPT")
+				audioFileExists("egowebaudio/" + id + "/STUDY/ALTERPROMPT.mp3", $('.questionText'));
 			$('.questionText').show();
 			$('.question form').html('');
 		}
@@ -308,7 +310,7 @@ function view(id, interviewId, page)
 		}
 
 		$('label.multiselect-' + array_id).each(function(index){
-		    if($(this).html().match(/OTHER SPECIFY/i)){
+		    if($(this).html().match(/OTHER \(*SPECIFY\)*/i)){
 		    	display = '';
 		    	val = '';
 		    	if($('#' + $(this).attr('for')).prop('checked') != true)
