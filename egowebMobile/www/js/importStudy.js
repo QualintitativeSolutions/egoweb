@@ -12,7 +12,7 @@ function getStudyList(server){
 			var localStudyId = db.queryValue("SELECT id FROM serverstudy WHERE address = '" + server.ADDRESS + "' AND serverstudyid = " + k);
 			var interviews = 0;
 			if(localStudyId)
-				var interviews = db.queryObjects("SELECT id FROM interview WHERE studyId = " + localStudyId).data.length;
+				var interviews = db.queryObjects("SELECT id FROM interview WHERE studyId = " + localStudyId + " AND completed = -1").data.length;
 			console.log(localStudyId + ":" + interviews);
 			if(typeof color == 'undefined' || color == ' colorB')
 			    color = ' colorA';

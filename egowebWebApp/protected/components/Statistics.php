@@ -25,7 +25,10 @@ class Statistics extends CComponent {
 	 */
 
 	public function initComponents($interviewId, $expressionId){
-		$alters = Alters::model()->findAllByAttributes(array('interviewId'=>$interviewId));
+		$criteria = array(
+			'condition'=>"FIND_IN_SET(" . $interviewId . ", interviewId)",
+		);
+		$alters = Alters::model()->findAll($criteria);
 		$this->alters = $alters;
 		$alters2 = $alters;
 		$expression = new Expression;

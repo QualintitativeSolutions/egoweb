@@ -45,8 +45,10 @@
 			ego_question_list = '';
 			i++;
 		}
-		pages[i] = checkPage(i, pageNumber, "ALTER_PROMPT");
-		i++;
+		if(study.ALTERPROMPT.replace(/<\/*[^>]*>/gm, '').replace(/(\r\n|\n|\r)/gm,"")){
+			pages[i] = checkPage(i, pageNumber, "ALTER_PROMPT");
+			i++;
+		}
 		var alters = db.queryObjects("SELECT * FROM alters WHERE interviewId = " + interviewId).data;
 		if(alters.length > 0){
 			prompt = "";

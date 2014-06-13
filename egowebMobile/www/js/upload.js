@@ -97,15 +97,19 @@ function deleteStudy(id){
 			db.catalog.getTable("expression").deleteRow(expressions[t]);
 		}
 		db.commit();
-		deleteInterviews(id);
+		deleteInterviews(id, true);
 		getStudyList(server);
 	}else{
 		alert("you must upload data before you can delete");
 	}
 }
 
-function deleteInterviews(id){
-	var interviews = db.query("SELECT * FROM interview WHERE completed = -1 AND studyId = " + id).data;
+function deleteInterviews(id, all){
+	if(typeof all != "undefined")
+		all = "";
+	else
+		all = "completed = -1 AND";
+	var interviews = db.query("SELECT * FROM interview WHERE " + all + " studyId = " + id).data;
 	console.log(interviews);
 	for(u in interviews){
 	    var alters = db.query("SELECT * FROM alters WHERE interviewId = " + interviews[u][0]).data;

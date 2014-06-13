@@ -78,8 +78,7 @@ class AuthoringController extends Controller
 
 			if(move_uploaded_file($_FILES['userfile']['tmp_name'], Yii::app()->basePath."/../audio/".$_POST['studyId'] . "/" . $_POST['type'] . "/". $_POST['id'] . ".mp3"))
 				echo "<a class=\"playSound\" onclick=\"playSound($(this).attr('file'))\" href=\"#\" file=\"/audio/".$_POST['studyId'] . "/" . $_POST['type'] . "/". $_POST['id'] . ".mp3\"><span class=\"fui-volume play-sound\"></span></a>";
-			else
-				echo "error!";
+
 		}else if(isset($_GET['studyId']) && isset($_GET['type']) && isset($_GET['id'])){
 			$this->renderPartial('_form_audio',array(
 				'studyId'=>$_GET['studyId'],
@@ -877,16 +876,18 @@ class AuthoringController extends Controller
 					$expression = new Expression;
 				$this->renderPartial($_GET['form'], array('model'=>$model, 'expression'=>$expression, 'ajax'=>true, 'question'=>$question, 'studyId'=>$_GET['studyId']), false, false);
 			}else if($_GET['form'] == "_form_option"){
+
 				$criteria=new CDbCriteria;
 				$criteria=array(
 					'condition'=>"questionId = " . $_GET['questionId'],
 					'order'=>'ordering',
 				);
+
 				$dataProvider=new CActiveDataProvider('QuestionOption',array(
 					'criteria'=>$criteria,
 					'pagination'=>false,
 				));
-				$this->renderPartial($_GET['form'], array('dataProvider'=>$dataProvider, 'questionId'=>$_GET['questionId'], 'ajax'=>true), false, true);
+				$this->renderPartial("_form_option", array('dataProvider'=>$dataProvider, 'questionId'=>$_GET['questionId'], 'ajax'=>true), false, true);
 			}else if($_GET['form'] == "_form_option_list"){
 				$answerList = AnswerList::model()->findByPk($_GET['answerListId']);
 				$listOptions = preg_split('/,/', $answerList->listOptionNames);

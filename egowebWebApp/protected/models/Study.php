@@ -136,13 +136,15 @@ class Study extends CActiveRecord
 			$ego_question_list = array();
 			$i++;
 		}
-		$pages[$i] = Study::checkPage($i, $pageNumber, "ALTER_PROMPT");
-		$i++;
-			$criteria = array(
-				'condition'=>"FIND_IN_SET(" . $interviewId . ", interviewId)",
-			);
-			$alters = Alters::model()->findAll($criteria);
-			$answers = q("SELECT count(id) FROM answer WHERE interviewId = " . $interviewId . " AND (questionType =  'ALTER' OR questionType = 'ALTER_PAIR') ")->queryScalar();
+		if(trim(preg_replace('/<\/*[^>]*>/', '', $study->alterPrompt)) != ""){
+			$pages[$i] = Study::checkPage($i, $pageNumber, "ALTER_PROMPT");
+			$i++;
+		}
+		$criteria = array(
+			'condition'=>"FIND_IN_SET(" . $interviewId . ", interviewId)",
+		);
+		$alters = Alters::model()->findAll($criteria);
+		$answers = q("SELECT count(id) FROM answer WHERE interviewId = " . $interviewId . " AND (questionType =  'ALTER' OR questionType = 'ALTER_PAIR') ")->queryScalar();
 		if(count($alters) > 0 && $answers > 0){
 			$alter_qs = q("SELECT * FROM question WHERE studyId = $study->id AND subjectType ='ALTER' order by ordering")->queryAll();
 			$prompt = "";
@@ -291,7 +293,6 @@ class Study extends CActiveRecord
 				    	$page[$i] = $ego_question_list;
 				    	return $page[$i];
 				    }
-
 				    $prompt = trim(preg_replace('/<\/*[^>]*>/', '', $question->prompt));
 				    $ego_question_list = array();
 				    $i++;
@@ -327,7 +328,7 @@ class Study extends CActiveRecord
 				$i++;
 			}
 
-			if($pageNumber == $i){
+			if($pageNumber == $i && trim(preg_replace('/<\/*[^>]*>/', '', $study->alterPrompt)) != ""){
 				$alter_prompt = new Question;
 				$alter_prompt->answerType = "ALTER_PROMPT";
 				$alter_prompt->prompt = $study->alterPrompt;

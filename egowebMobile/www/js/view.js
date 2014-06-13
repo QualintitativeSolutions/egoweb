@@ -19,6 +19,7 @@ function timeBits(timeUnits)
 
 function view(id, interviewId, page)
 {
+	delete offset;
 	if(page != null)
 		currentPage = page;
 
@@ -36,10 +37,23 @@ function view(id, interviewId, page)
 	$('#ERROR').html('');
 	$('#ERROR').hide();
 
+	questionOrder = [];
+	if (Object.keys(questions).length > 1){
+		for (var l in questions) {
+			if(typeof offset == "undefined")
+				var offset = questions[l].ORDERING;
+			if(questions[l].SUBJECTTYPE == "EGO_ID")
+				questionOrder[questions[l].ORDERING] = questions[l].ID;
+			else
+				questionOrder[questions[l].ORDERING - offset] = questions[l].ID;
+		}
+	}
+
 	for (var l in questions) {
-		questionOrder = [];
-		$(ego_id_questions).each(function(index){questionOrder.push(ego_id_questions[index].ID)});
+
 		if(questions[l].SUBJECTTYPE == "EGO_ID")
+			var k = questionOrder[counter];
+		else if (questions[l].SUBJECTTYPE == "EGO" && parseInt(questions[l].ASKINGSTYLELIST) && Object.keys(questions).length > 1)
 			var k = questionOrder[counter];
 		else
 			var k = l;
@@ -309,23 +323,6 @@ function view(id, interviewId, page)
 			}
 		}
 
-		$('label.multiselect-' + array_id).each(function(index){
-		    if($(this).html().match(/OTHER \(*SPECIFY\)*/i)){
-		    	display = '';
-		    	val = '';
-		    	if($('#' + $(this).attr('for')).prop('checked') != true)
-		    		display = 'style="display:none"';
-		    	else
-		    		val = otherValue[$('#' + $(this).attr('for')).val()];
-		    	$(this).after(
-		    	'<input id="' + $('#' + $(this).attr('for')).val() + '" class="' + array_id +'_other" ' + display+ ' onchange="changeOther('+array_id+')" value="'+  val + '" style="margin:5px"/>'
-		    	);
-		    	$('#' + $(this).attr('for')).click(function(){
-		    		toggleOther($('#' + $(this).val()));
-		    	});
-		    }
-		});
-
 		if(Object.keys(skipList).length > 0){
 			var skipForm = $('#SKIP').clone();
 			$('input', skipForm).each(function(index){
@@ -359,6 +356,25 @@ function view(id, interviewId, page)
 			newForm.append('<br clear=all>');
 
 		$('.question form').append(newForm);
+
+
+		$('label.multiselect-' + array_id).each(function(index){
+		    if($(this).html().match(/OTHER \(*SPECIFY\)*/i)){
+		    	console.log($(this));
+		    	display = '';
+		    	val = '';
+		    	if($('#' + $(this).attr('for')).prop('checked') != true)
+		    		display = 'style="display:none"';
+		    	else
+		    		val = otherValue[$('#' + $(this).attr('for')).val()];
+		    	$(this).after(
+		    	'<input id="' + $('#' + $(this).attr('for')).val() + '" class="' + array_id +'_other" ' + display+ ' onchange="changeOther('+array_id+')" value="'+  val + '" style="margin:5px"/>'
+		    	);
+		    	$('#' + $(this).attr('for')).click(function(){
+		    		toggleOther($('#' + $(this).val()));
+		    	});
+		    }
+		});
 
 		var answerInput = $('#ANSWERPOST').children().clone();
 		answerInput.each(function(index){

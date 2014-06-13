@@ -312,9 +312,8 @@ function toggleOther(option){
 
 function changeOther(other_id){
 	otherText = [];
-	$('.' + array_id + '_other').each(function(index){
-		if($(this).is(":visible"))
-			otherText.push($(this).attr('id')+":"+$(this).val());
+	$('.' + other_id + '_other:visible').each(function(index){
+		otherText.push($(this).attr('id')+":"+$(this).val());
 	});
 	$('#Answer_' + other_id + '_OTHERSPECIFYTEXT').val(otherText.join(';;'));
 }
@@ -455,8 +454,8 @@ function changeOther(other_id){
 			</div>
 			<br clear=left>
 			<div style="float:left; margin-top:20px">
-			    <a class="graybutton" href="javascript:void(0)" onclick="view(studyId,interviewId, currentPage-1)" style="display:none">Back</a>
-			    <button id="next" class='orangebutton' onclick="save(studyId,currentPage)" style="display:none">Next</button>
+			    <a class="graybutton" href="javascript:void(0)" onclick="view(studyId,interviewId, currentPage-1);audio.pause();" style="display:none">Back</a>
+			    <button id="next" class='orangebutton' onclick="save(studyId,currentPage);audio.pause();" style="display:none">Next</button>
 			</div>
 		</div>
 	</body>

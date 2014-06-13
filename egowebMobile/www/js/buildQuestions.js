@@ -78,7 +78,7 @@ function buildQuestions(id, pageNumber, interviewId){
 			page[i] = new Object;
 		}
 
-		if(pageNumber == i){
+		if(pageNumber == i && study.ALTERPROMPT.replace(/<\/*[^>]*>/gm, '').replace(/(\r\n|\n|\r)/gm,"") != ""){
 			alter_prompt = new Question();
 			alter_prompt.ANSWERTYPE = "ALTER_PROMPT";
 			alter_prompt.PROMPT = study.ALTERPROMPT;
