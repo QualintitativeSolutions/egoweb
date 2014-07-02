@@ -135,6 +135,17 @@ class InterviewingController extends Controller
 		{
 
 			$study = Study::model()->findByPk($id);
+			$errors = 0;
+
+			if(stristr($id, "key"))
+				list($id, $key) = explode('&key=', $id);
+			else
+				$key = '';
+
+			if(isset($_POST['nodes']))
+				$nodes = "&nodes=" .  urlencode($_POST['nodes']);
+			else
+				$nodes = "";
 
 			if(isset($_POST['Answer'][0]) && $_POST['Answer'][0]['answerType'] == "CONCLUSION"){
 				$interview = Interview::model()->findByPk($_POST['Answer'][0]['interviewId']);
@@ -145,13 +156,6 @@ class InterviewingController extends Controller
 				else
 					$this->redirect(Yii::app()->createUrl('admin/'));
 			}
-
-			if(stristr($id, "key")){
-				list($id, $key) = explode('&key=', $id);
-			}else{
-				$key = '';
-			}
-			$errors = 0;
 
 			foreach($_POST['Answer'] as $Answer){
 
@@ -410,7 +414,7 @@ class InterviewingController extends Controller
 				$this->redirect(Yii::app()->createUrl(
 					'interviewing/'.$_POST['studyId'].'?'.
 					'interviewId='.$interviewId.'&'.
-					'page='.$page.'&key=' . $key
+					'page='.$page.'&key=' . $key . $nodes
 				));
 			}else{
 				$qNav =  Study::nav($study, $_POST['page'], $interviewId);

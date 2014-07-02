@@ -12,6 +12,10 @@ if(isset($_GET['key']))
 else
 	$key = '';
 }
+	if(isset($_GET['nodes']))
+		$nodes = $_GET['nodes'];
+	else
+		$nodes = "";
 ?>
 <script>
 
@@ -125,7 +129,7 @@ $this->renderPartial('_view_alter', array('dataProvider'=>$dataProvider, 'alterP
 
 <?php if(isset($questions[0])): ?>
 	<?php if(in_array($questions[0]->answerType, $prompts)): ?>
-		<div class="questionText">
+		<div class="questionText" <?php if($questions[0]->answerType == "ALTER_PROMPT"){ echo " style='width:600px';"; } ?>>
 		<?php echo Interview::interpretTags($questions[0]->prompt, $interviewId); ?>
 		<?php if($questions[0]->answerType == "PREFACE" && file_exists(Yii::app()->basePath."/../audio/".$studyId . "/PREFACE/" . $questions[0]->id . ".mp3")):?>
 			<script>
@@ -194,7 +198,7 @@ foreach($questions as $question) {
 
 	<?php
 	// display error
-	if($counter == 0 && $error_id != ""){
+	if($counter == 0 && $error_id !== ""){
 		echo $form->errorSummary($model[$error_id]);
 	}
 	?>
@@ -533,11 +537,17 @@ if($rowColor != "" && $question->askingStyleList){
 		<input name="page" type=hidden value=<?php echo $page ?> />
 		<input name="studyId" type=hidden value=<?php echo $studyId ?> />
 
+<?php
+if($networkQuestion){
+	echo "<input id='Graph_nodes' name='nodes' value='$nodes' style='display:none'>";
+}
+?>
+
 <?php $this->endWidget(); ?>
 
 <?php
 if($networkQuestion){
-	echo "<div style='margin-left:20px'>";
+	echo "<div id='interviewing' style='margin-left:20px'>";
 	$this->widget('plugins.visualize', array('method'=>$interviewId, 'id'=>$networkQuestion->networkRelationshipExprId, 'params'=>$networkQuestion->networkParams));
 	echo "</div>";
 }
@@ -545,7 +555,7 @@ if($networkQuestion){
 
 <div id="buttonRow" style="float:left;padding-bottom:20px;clear:left">
 	<?php if($page != 0 ): ?>
-		<a class="graybutton" href="/interviewing/<?php echo $studyId. "?interviewId=". $interviewId . "&page=". ($page - 1) . $key; ?>">Back</a>
+		<a class="graybutton" href="/interviewing/<?php echo $studyId. "?interviewId=". $interviewId . "&page=". ($page - 1) . $key . ($nodes ? "&nodes=" . urlencode($nodes) : ""); ?>">Back</a>
 	<?php endif; ?>
 	<?php if($completed != -1): ?>
 		<?php if($question->answerType != "CONCLUSION"): ?>

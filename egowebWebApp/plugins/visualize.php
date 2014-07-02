@@ -3,6 +3,8 @@ class visualize extends Plugin
 {
 	public $params = "";
 	public $edgeColors = array(
+		'#000'=>'black',
+		'#ccc'=>'gray',
 		'#07f'=>'blue',
 		'#0c0'=>'green',
 		'#fa0'=>'yellow',
@@ -111,7 +113,7 @@ class visualize extends Plugin
 					}
 				}
 
-			}else{
+			}else if($this->params['nodeColor']['questionId']){
 				$answer = q("SELECT value FROM answer WHERE questionID = ".$this->params['nodeColor']['questionId']. " AND alterId1 = " .$nodeId)->queryScalar();
 				$answer = explode(',', $answer);
 				foreach($this->params['nodeColor']['options'] as $option){
@@ -173,7 +175,7 @@ class visualize extends Plugin
 	}
 
 	private function getEdgeColor($nodeId1, $nodeId2){
-		$default = "#07f";
+		$default = "#000";
 		if(isset($this->params['edgeColor'])){
 			$answer = q("SELECT value FROM answer WHERE questionID = ".$this->params['edgeColor']['questionId']. " AND alterId1 = " .$nodeId1 . " AND alterId2 = " . $nodeId2)->queryScalar();
 			$answer = explode(',', $answer);
@@ -202,7 +204,11 @@ class visualize extends Plugin
 	{
 		$notes = Note::model()->findAllByAttributes(array("interviewId"=>$this->params, "expressionId"=>$this->id));
 		foreach($notes as $note){
-			echo "<div style='width:50%;float:left;padding-right:20px' class=''><h3>" . Alters::getName($note->alterId) . " </h3><small>$note->notes</small></div>";
+			if(is_numeric($note->alterId))
+				$label = Alters::getName($note->alterId);
+			else
+				$label = str_replace("graphNote-", "", $note->alterId);
+			echo "<div style='width:50%;float:left;padding-right:20px' class=''><h3>" . $label . " </h3><small>$note->notes</small></div>";
 		}
 	}
 
@@ -598,6 +604,7 @@ class visualize extends Plugin
 <script>
 interviewId = <?php echo $this->method; ?>;
 expressionId = <?php echo $this->id; ?>;
+notes = <?php echo json_encode($alterNotes) ?>;
 var labelType, useGradients, nativeTextSupport, animate;
 (function() {
 	var ua = navigator.userAgent,
@@ -628,7 +635,9 @@ function saveNodes()
 {
 	var nodes = {};
 	for(var k in fd.graph.nodes){
-		nodes[k] = {x:fd.graph.nodes[k].pos.x, y:fd.graph.nodes[k].pos.y};
+		if(!k.match(/graphNote/) || (k.match(/graphNote/) && typeof notes[k] != "undefined")){
+			nodes[k] = {x:fd.graph.nodes[k].pos.x, y:fd.graph.nodes[k].pos.y};
+		}
 	}
 	$("#Graph_nodes").val(JSON.stringify(nodes));
 	$("#nodeList").val(JSON.stringify(nodes));
@@ -644,8 +653,134 @@ function saveGraph(){
 	}
 }
 
+function refresh(container){
+	var params = new Object;
+	if(typeof container == "undefined")
+		container = $('body');
+	if($('#nodeColorSelect option:selected', container).val()){
+		var nodeColor = new Object;
+		var question = $('#nodeColorSelect option:selected', container).val();
+		nodeColor['questionId'] = question.replace('_nodeColor','');
+		nodeColor['options'] = [];
+		$("#" + question + " select", container).each(function(index){
+			nodeColor['options'].push({"id":$(this).attr('id'),"color":$("option:selected", this).val()});
+		});
+		params['nodeColor'] = nodeColor;
+	}
+	if($('#nodeShapeSelect option:selected', container).val()){
+		var nodeShape = new Object;
+		var question = $('#nodeShapeSelect option:selected', container).val();
+		nodeShape['questionId'] = question.replace('_nodeShape','');
+		nodeShape['options'] = [];
+		$("#" + question + " select", container).each(function(index){
+			nodeShape['options'].push({"id":$(this).attr('id'),"shape":$("option:selected", this).val()});
+		});
+		params['nodeShape'] = nodeShape;
+	}
+	if($('#nodeSizeSelect option:selected', container).val()){
+		var nodeSize = new Object;
+		var question = $('#nodeSizeSelect option:selected', container).val();
+		nodeSize['questionId'] = question.replace('_nodeSize','');
+		nodeSize['options'] = [];
+		$( "#" + question + " select", container).each(function(index){
+			nodeSize['options'].push({"id":$(this).attr('id'),"size":$("option:selected", this).val()});
+		});
+		params['nodeSize'] = nodeSize;
+	}
+	if($('#edgeColorSelect option:selected', container).val()){
+		var edgeColor = new Object;
+		var question = $('#edgeColorSelect option:selected', container).val();
+		edgeColor['questionId'] = question.replace('_edgeColor','');
+		edgeColor['options'] = [];
+		$("#" + question + " select", container).each(function(index){
+			edgeColor['options'].push({"id":$(this).attr('id'),"color":$("option:selected", this).val()});
+		});
+		params['edgeColor'] = edgeColor;
+	}
+	if($('#edgeSizeSelect option:selected', container).val()){
+		var edgeSize = new Object;
+		var question = $('#edgeSizeSelect option:selected', container).val();
+		edgeSize['questionId'] = question.replace('_edgeSize','');
+		edgeSize['options'] = [];
+		$("#" + question + " select", container).each(function(index){
+			edgeSize['options'].push({"id":$(this).attr('id'),"size":$("option:selected", this).val()});
+		});
+		params['edgeSize'] = edgeSize;
+	}
+	console.log(JSON.stringify(params));
+
+	$("#Graph_params").val(JSON.stringify(params));
+	return params;
+}
+
+function reload(params){
+	url = "/data/visualize?expressionId=" + expressionId + "&interviewId=" + interviewId + "&params=" + encodeURIComponent(JSON.stringify(params));
+	document.location = url;
+}
+
+function print(){
+	saveNodes();
+	params = refresh();
+	url = "/data/visualize?print&expressionId=" + expressionId + "&interviewId=" + interviewId + "&params=" + encodeURIComponent($("#nodeParams").val()) + "&nodes=" +  encodeURIComponent($("#nodeList").val());
+	window.open(url);
+}
+
+function saveNote(){
+	var noteContent = $("#Note_notes").val();
+	$.post("/data/savenote", $("#note-form").serialize(), function(data){
+		if(!isNaN(data))
+			$("#" + data + " .name").html($("#" + data + " .name").html() + " <span class='fui-new'></span>");
+		notes[data] = noteContent;
+		saveNodes();
+		var list = [];
+		var node = fd.graph.getNode(data);
+		node.eachAdjacency(function(adj){
+			if(adj.getData('alpha')) list.push(adj.nodeTo.name.replace("<span class='fui-new'></span>",""));
+		});
+		var url = "/data/getnote?interviewId=" + interviewId + "&expressionId=" + expressionId + "&alterId=" + data;
+		$.get(url, function(data){
+			$jit.id('inner-details').innerHTML = data;
+			$jit.id('inner-details').innerHTML = $jit.id('inner-details').innerHTML + "<div class='pull-left col-sm-3'>" +
+			"<label>Connections</label><br>" +
+			list.join("</li><li>") + "</li></ul></div>"
+		});
+	});
+
+}
+
+function deleteNote(){
+	$.post("/data/deletenote", $("#note-form").serialize(), function(data){
+		if(!isNaN(data)){
+			var list = [];
+			var node = fd.graph.getNode(data);
+			node.name = node.name.replace("<span class='fui-new'></span>","");
+			fd.labels.clearLabels(true);
+			$jit.id('inner-details').innerHTML = "";
+			fd.plot();
+
+		}else{
+			delete notes[data];
+			fd.graph.removeNode(data);
+			fd.labels.clearLabels();
+			$jit.id('inner-details').innerHTML = "";
+			graphNotes = 0;
+			for(k in notes){
+				if(k.match(/graphNote/)){
+					noteId = parseInt(k.match(/graphNote-(\d+)/)[1]);
+					if(noteId > graphNotes)
+						graphNotes = noteId;
+				}
+			}
+			fd.plot();
+
+		}
+		saveNodes();
+	});
+}
+
 function init(json)
 {
+	graphNotes = 0;
 	// init json
 	if(!json)
 		json = [];
@@ -673,7 +808,6 @@ function init(json)
 		// JSON structure.
 		Node: {
 			overridable: true,
-			dim: 5
 		},
 		Edge: {
 			overridable: true,
@@ -700,6 +834,18 @@ function init(json)
 			enable: (typeof printView == "undefined" ? true : false),
 			enableForEdges: true,
 			type: 'Native',
+
+			onClick: function(node, eventInfo, e) {
+				if(!node && e.srcElement == document.getElementById("infovis-canvas")){
+					var pos = eventInfo.getPos();
+					if(graphNotes == 0 || typeof notes['graphNote-' + graphNotes] != "undefined"){
+						graphNotes++;
+						fd.graph.addNode({'id':'graphNote-' + graphNotes, 'name':graphNotes, 'data':{$color: "#000",$type: "note",$dim: 12}});
+					}
+					fd.graph.nodes['graphNote-' + graphNotes].getPos().setc(pos.x, pos.y);
+					fd.plot();
+				}
+			},
 			//Change cursor style when hovering a node
 			onMouseEnter: function(node, eventInfo, e) {
 				if(node){
@@ -809,6 +955,9 @@ function init(json)
 				}
 				$('.name').css("background-color", "transparent");
 				$('.name').css("color", "#000");
+				$('.name').css("text-shadow", "0px 0px 5px white, 0px 0px 5px white,0px 0px 5px white, 0px 0px 5px white,0px 0px 5px white, 0px 0px 5px white");
+
+				$(this).css("text-shadow", "none");
 				$(this).css("color", "#FFF");
 				$(this).css("background-color", "#555");
 
@@ -866,102 +1015,39 @@ function init(json)
 				transition: $jit.Trans.Elastic.easeOut,
 				duration: 0,
 				onComplete: function(){
+					// load free floating notes
+					for(k in notes){
+						if(k.match(/graphNote/)){
+							noteId = k.match(/graphNote-(\d+)/)[1];
+							fd.graph.addNode({'id':k, 'name':noteId, 'data':{$color: "#000",$type: "note",$dim: 12}});
+							fd.graph.nodes['graphNote-' + noteId].pos.x = 0 - ($(fd.canvas.getElement()).width() / 2);
+							fd.graph.nodes['graphNote-' + noteId].pos.y = 0 - ($(fd.canvas.getElement()).height() / 2) + graphNotes * 20;
+							graphNotes = parseInt(noteId);
+						}
+					}
 					// loads saved node positions
 					if($('#Graph_nodes').val()){
 						nodes = fd.graph.nodes;
 						nodePositions = JSON.parse($('#Graph_nodes').val());
 						for (k in nodes) {
-							nodes[k].pos.x = nodePositions[k].x;
-							nodes[k].pos.y = nodePositions[k].y;
+							if(typeof nodePositions[k] != "undefined"){
+								nodes[k].pos.x = nodePositions[k].x;
+								nodes[k].pos.y = nodePositions[k].y;
+							}
 						}
-						fd.plot();
 					}
+					fd.plot();
+					saveNodes();
 				}
 			});
 		}
 	});
 }
 
-function refresh(container){
-	var params = new Object;
-	if(typeof container == "undefined")
-		container = $('body');
-	if($('#nodeColorSelect option:selected', container).val()){
-		var nodeColor = new Object;
-		var question = $('#nodeColorSelect option:selected', container).val();
-		nodeColor['questionId'] = question.replace('_nodeColor','');
-		nodeColor['options'] = [];
-		$("#" + question + " select", container).each(function(index){
-			nodeColor['options'].push({"id":$(this).attr('id'),"color":$("option:selected", this).val()});
-		});
-		params['nodeColor'] = nodeColor;
-	}
-	if($('#nodeShapeSelect option:selected', container).val()){
-		var nodeShape = new Object;
-		var question = $('#nodeShapeSelect option:selected', container).val();
-		nodeShape['questionId'] = question.replace('_nodeShape','');
-		nodeShape['options'] = [];
-		$("#" + question + " select", container).each(function(index){
-			nodeShape['options'].push({"id":$(this).attr('id'),"shape":$("option:selected", this).val()});
-		});
-		params['nodeShape'] = nodeShape;
-	}
-	if($('#nodeSizeSelect option:selected', container).val()){
-		var nodeSize = new Object;
-		var question = $('#nodeSizeSelect option:selected', container).val();
-		nodeSize['questionId'] = question.replace('_nodeSize','');
-		nodeSize['options'] = [];
-		$( "#" + question + " select", container).each(function(index){
-			nodeSize['options'].push({"id":$(this).attr('id'),"size":$("option:selected", this).val()});
-		});
-		params['nodeSize'] = nodeSize;
-	}
-	if($('#edgeColorSelect option:selected', container).val()){
-		var edgeColor = new Object;
-		var question = $('#edgeColorSelect option:selected', container).val();
-		edgeColor['questionId'] = question.replace('_edgeColor','');
-		edgeColor['options'] = [];
-		$("#" + question + " select", container).each(function(index){
-			edgeColor['options'].push({"id":$(this).attr('id'),"color":$("option:selected", this).val()});
-		});
-		params['edgeColor'] = edgeColor;
-	}
-	if($('#edgeSizeSelect option:selected', container).val()){
-		var edgeSize = new Object;
-		var question = $('#edgeSizeSelect option:selected', container).val();
-		edgeSize['questionId'] = question.replace('_edgeSize','');
-		edgeSize['options'] = [];
-		$("#" + question + " select", container).each(function(index){
-			edgeSize['options'].push({"id":$(this).attr('id'),"size":$("option:selected", this).val()});
-		});
-		params['edgeSize'] = edgeSize;
-	}
-	console.log(JSON.stringify(params));
-
-	$("#Graph_params").val(JSON.stringify(params));
-	return params;
-}
-
-function reload(params){
-	url = "/data/visualize?expressionId=" + expressionId + "&interviewId=" + interviewId + "&params=" + encodeURIComponent(JSON.stringify(params));
-	document.location = url;
-}
 $(function(){
 	json = <?= $adjacencies; ?>;
 	init(json);
 });
-
-function print(){
-	saveNodes();
-	params = refresh();
-	url = "/data/visualize?print&expressionId=" + expressionId + "&interviewId=" + interviewId + "&params=" + encodeURIComponent($("#nodeParams").val()) + "&nodes=" +  encodeURIComponent($("#nodeList").val());
-	window.open(url);
-}
-function saveNote(){
-	$.post("/data/savenote", $("#note-form").serialize(), function(data){
-		$("#" + data + " .name").html($("#" + data + " .name").html() + " <span class='fui-new'></span>");
-	});
-}
 </script>
 		<div id="container">
 			<div id="center-container">

@@ -155,16 +155,28 @@ $(function(){
 		<?php echo $form->checkBox($model,'fillAlterList'); ?>
 
 	<div class="row buttons">
-		<?php echo CHtml::submitButton($model->isNewRecord ? 'Create' : 'Save'); ?>
-	</div>
+		<?php echo CHtml::submitButton($model->isNewRecord ? 'Create' : 'Save', array("class"=>"btn btn-primary btn-sm",)); ?>
 
 	<?php $this->endWidget(); ?>
 	<?php if(!$model->isNewRecord): ?>
 		<?php echo CHtml::button(
 			"Delete",
-			array("onclick"=>"js:if(confirm('Are you sure you want to delete this study?')){document.location.href='/authoring/delete/".$model->id. "'}")
+			array(
+				"class"=>"btn btn-danger btn-sm pull-right",
+				"onclick"=>"js:if(confirm('Are you sure you want to delete this study?')){document.location.href='/authoring/delete/".$model->id. "'}"
+			)
+		); ?>
+		<?php echo CHtml::button(
+			"Archive",
+			array(
+				"class"=>"btn btn-warning btn-sm pull-right",
+				"onclick"=>"js:document.location.href='/authoring/archive/".$model->id."'"
+			)
 		); ?>
 	<?php endif; ?>
+
+	</div>
+
 </div>
 	<div class="row" style="float:left;width:100%; padding:10px">
 

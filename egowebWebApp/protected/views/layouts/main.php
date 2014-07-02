@@ -73,6 +73,7 @@
 									<?php endforeach; ?>
 								</ul>
 							</li>
+							<li><a href="/archive">Archive</a></li>
 							<li><a href="/importExport">Import & Export Studies</a></li>
 							<li><a href="/admin/user">User Admin</a>
 							<?php endif; ?>

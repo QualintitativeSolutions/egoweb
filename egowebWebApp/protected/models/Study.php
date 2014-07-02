@@ -333,6 +333,7 @@ class Study extends CActiveRecord
 				$alter_prompt->answerType = "ALTER_PROMPT";
 				$alter_prompt->prompt = $study->alterPrompt;
 				$alter_prompt->studyId = $study->id;
+				$alter_prompt->id = 0;
 				$page[$i] = array('0'=>$alter_prompt);
 				return $page[$i];
 			}

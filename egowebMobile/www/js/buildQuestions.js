@@ -168,8 +168,8 @@ function buildQuestions(id, pageNumber, interviewId){
 						if(evalExpression(alter_pair_questions[j].ANSWERREASONEXPRESSIONID, interviewId, alters[k].ID, alters2[l].ID) != true)
 							continue;
 						question = $.extend(true,{}, alter_pair_questions[j]);
-						question.PROMPT = question.PROMPT.replace('$$1', alters[k].NAME);
-						question.PROMPT = question.PROMPT.replace('$$2', alters2[l].NAME);
+						question.PROMPT = question.PROMPT.replace(/\$\$1/g, alters[k].NAME);
+						question.PROMPT = question.PROMPT.replace(/\$\$2/g, alters2[l].NAME);
 						question.ALTERID1 = alters[k].ID;
 						question.ALTERID2 = alters2[l].ID;
 						if(alter_pair_questions[j].ASKINGSTYLELIST){

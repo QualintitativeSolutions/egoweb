@@ -24,7 +24,7 @@ class DataController extends Controller
 	{
 		return array(
 			array('allow', // allow authenticated user to perform 'create' and 'update' actions
-				'actions'=>array('index', 'exportego', 'savenote', 'exportalterpair', 'exportalterlist', 'exportother', 'visualize', 'study', 'ajaxAdjacencies'),
+				'actions'=>array('index', 'exportego', 'savenote', 'noteexists','exportalterpair', 'exportalterlist', 'exportother', 'visualize', 'study', 'ajaxAdjacencies'),
 				'users'=>array('@'),
 			),
 			array('allow',  // deny all users
@@ -519,7 +519,7 @@ class DataController extends Controller
 				$graph = new Graph;
 			$graph->attributes = $_POST['Graph'];
 			$check = Graph::model()->findByAttributes(array("interviewId"=>$graph->interviewId,"expressionId"=>$graph->expressionId, "name"=>$graph->name));
-			if($check){
+			if($graph->isNewRecord && $check){
 				$url =  "graphId=" . $graph->id . "&interviewId=" . $graph->interviewId . "&expressionId=".$graph->expressionId."&params=".urlencode($graph->params);
 				Yii::app()->user->setFlash('error', "Graph name already exists for this expression!");
 				Yii::app()->request->redirect($this->createUrl("/data/visualize?" . $url));
@@ -565,6 +565,19 @@ class DataController extends Controller
 				print_r($note->errors);
 			if($new)
 				echo $note->alterId;
+		}
+	}
+
+	public function actionDeletenote()
+	{
+		if(isset($_POST['Note'])){
+
+			$note = Note::model()->findByPk($_POST['Note']['id']);
+			$alterId = $note->alterId;
+			if($note){
+				$note->delete();
+				echo $alterId;
+			}
 		}
 	}
 

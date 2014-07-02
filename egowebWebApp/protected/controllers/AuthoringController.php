@@ -176,7 +176,7 @@ class AuthoringController extends Controller
 
 		$condition = "id != 0";
 		if(!Yii::app()->user->isSuperAdmin){
-			$studies = q("SELECT studyId FROM interviewers WHERE interviewerId = " . Yii::app()->user->id)->queryColumn();
+			$studies = q("SELECT studyId FROM interviewers WHERE active = 1 AND interviewerId = " . Yii::app()->user->id)->queryColumn();
 			if($studies)
 				$condition = "id IN (" . implode(",", $studies) . ")";
 			else
@@ -511,6 +511,18 @@ class AuthoringController extends Controller
 			$study = Study::model()->findByPk($id);
 			$study->delete();
 			Yii::app()->request->redirect("/authoring");
+		}
+	}
+
+	public function actionArchive($id){
+		$interviews = Interview::model()->findAllByAttributes(array("studyId"=>$id));
+		if(count($interviews) > 0){
+			echo "Please delete all interviews before archiving this study";
+		}else{
+			$study = Study::model()->findByPk($id);
+			$study->active = 0;
+			$study->save();
+			Yii::app()->request->redirect("/archive");
 		}
 	}
 

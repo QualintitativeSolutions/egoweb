@@ -6,7 +6,14 @@ $form = $this->beginWidget('CActiveForm', array(
 ));?>
 <?php echo $form->hiddenField($model,'id',array('value'=>$model->id)); ?>
 <div class="form-group">
-<label class="control-label"><?= Alters::getName($model->alterId); ?></label>
+<label class="control-label">
+<?php
+if(is_numeric($model->alterId))
+	echo Alters::getName($model->alterId);
+else
+	echo str_replace("graphNote-", "", $model->alterId);
+?>
+</label>
 
 <?php echo $form->textArea($model,'notes',array('value'=>$model->notes, 'class'=>'form-control', 'placeholder'=>'notes')); ?>
 
@@ -15,6 +22,10 @@ $form = $this->beginWidget('CActiveForm', array(
 <?php echo $form->hiddenField($model,'expressionId',array('value'=>$model->expressionId)); ?>
 <?php echo $form->hiddenField($model,'alterId',array('value'=>$model->alterId)); ?>
 
+
 <button class="btn btn-primary pull-right" onclick="saveNote();return false;">Save Note</button>
+<?php if(!$model->isNewRecord): ?>
+<button class="btn btn-danger pull-right" onclick="deleteNote();return false;" style="margin-right:10px;">Delete Note</button>
+<?php endif; ?>
 <?php $this->endWidget(); ?>
 </div>
